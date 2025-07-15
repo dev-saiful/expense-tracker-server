@@ -1,21 +1,21 @@
-import { CronJob } from "cron";
-import https from "https";
+import { nodeCron as cron } from "node-cron";
+import axios from "axios";
 
 const URL = process.env.URL;
 
-const job = new CronJob("*/14 * * * *", function(){
-    https.get(URL,(res)=>{
-        if(res.statusCode===200)
-        {
-            console.log("Request sent successfully");
-        }
-        else
-        {
-            console.log("Request failed",res.statusCode);
-        }
-    }).on("error",(e)=>{
-        console.error("Internel error",e);
-    });
-});
-
-export default job;
+cron.schedule(
+  "*/14 * * * *",
+  async () => {
+    console.log(`[${new Date().toISOString()}] Requesting: ${URL}`);
+    try {
+      const response = await axios.get(URL);
+      console.log(response.status);
+    } catch (error) {
+      console.error("Error executing cron job:", error.message);
+    }
+  },
+  {
+    scheduled: true,
+    timezone: "Asia/Dhaka",
+  }
+);
